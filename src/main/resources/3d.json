@@ -1,0 +1,13 @@
+{
+  "title": ".entry-header h1[itemprop=headline]",
+  "author": ".entry-info span[itemprop=name]",
+  "article": ".js-mediator-article",
+  "date": ".entry-info strong",
+  "comments": [
+    {
+      "author": ".mc-comments .mc-comment .mc-comment-username",
+      "content": ".mc-comments .mc-comment .mc-comment-msg",
+      "date": ".mc-comments .mc-comment-head .mc-comment-time"
+    }
+  ]
+}

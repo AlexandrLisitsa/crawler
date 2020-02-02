@@ -1,0 +1,9 @@
+{
+  "posts": [
+    {
+      "author": "table[id^=post] .bigusername",
+      "date": "table[id^=post] span[itemprop=dateCreated]",
+      "content": "table[id^=post] div[itemprop=text]"
+    }
+  ]
+}
