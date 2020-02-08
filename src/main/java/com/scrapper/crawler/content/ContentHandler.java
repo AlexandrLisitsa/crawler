@@ -171,7 +171,7 @@ public class ContentHandler {
       Page tmp = null;
       while ((elem = (((HtmlPage) page).querySelector(jsContent))) != null) {
         tmp = elem.click();
-        if (((HtmlPage) page).asText().equals(((HtmlPage) tmp).asText())) {
+        if (((HtmlPage) page).asXml().equals(((HtmlPage) tmp).asXml())) {
           break;
         } else {
           page = tmp;
