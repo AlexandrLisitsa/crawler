@@ -8,6 +8,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.scrapper.storage.LocalStorageSaver;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -39,18 +40,23 @@ public class ContentHandler {
   private Set<Entry<String, JsonElement>> selectors;
   private WebClient client;
 
+  private LocalStorageSaver storageSaver;
+
+  public ContentHandler(LocalStorageSaver storageSaver) {
+    this.storageSaver = storageSaver;
+  }
+
   public void setTopicsUrl(Set<String> topicsUrl) {
     this.topicsUrl = topicsUrl;
   }
 
-  public List<JsonObject> extractContent() {
-    List<JsonObject> content = new ArrayList<>();
+  public void extractContent() {
     topicsUrl.forEach(url -> {
       try {
         System.out.println(url);
         List<String> httpMarkup = getHttpMarkups(url);
         JsonObject jsonObject = extractContentBySelectors(httpMarkup);
-        content.add(jsonObject);
+        storageSaver.saveContent(jsonObject);
         System.out.println(jsonObject);
         System.out.println();
       } catch (Exception e) {
@@ -58,7 +64,6 @@ public class ContentHandler {
         e.printStackTrace();
       }
     });
-    return content;
   }
 
   private JsonObject extractContentBySelectors(List<String> markup) {

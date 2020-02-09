@@ -33,14 +33,22 @@ public class TopicCrawler extends AbstractCrawler {
       HtmlParseData data = (HtmlParseData) page.getParseData();
       Set<WebURL> outgoingUrls = data.getOutgoingUrls();
       outgoingUrls.forEach(x -> {
-        if (topicFilter.matchTopic(x.getURL()) && uniqueTopics.size() < maxTopicAmount) {
-          uniqueTopics.add(x.getURL());
-        } else {
-          this.shutdown();
+        if (topicFilter.matchTopic(x.getURL())) {
+          addUrl(x.getURL());
         }
       });
 
       System.out.println(page.getWebURL().getURL() + " Unique Topic:" + uniqueTopics.size());
+    }
+  }
+
+  private void addUrl(String url) {
+    if (maxTopicAmount == -1) {
+      uniqueTopics.add(url);
+    } else if (uniqueTopics.size() < maxTopicAmount) {
+      uniqueTopics.add(url);
+    } else {
+      this.shutdown();
     }
   }
 
