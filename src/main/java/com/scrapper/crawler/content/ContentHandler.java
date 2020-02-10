@@ -8,6 +8,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.scrapper.storage.LocalStorageSaver;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -39,26 +40,33 @@ public class ContentHandler {
   private Set<Entry<String, JsonElement>> selectors;
   private WebClient client;
 
+  private LocalStorageSaver storageSaver;
+
+  public ContentHandler(LocalStorageSaver storageSaver) {
+    this.storageSaver = storageSaver;
+  }
+
   public void setTopicsUrl(Set<String> topicsUrl) {
     this.topicsUrl = topicsUrl;
   }
 
-  public List<JsonObject> extractContent() {
-    List<JsonObject> content = new ArrayList<>();
+  public void extractContent() {
     topicsUrl.forEach(url -> {
       try {
+        initWebClient();
         System.out.println(url);
         List<String> httpMarkup = getHttpMarkups(url);
         JsonObject jsonObject = extractContentBySelectors(httpMarkup);
-        content.add(jsonObject);
+        storageSaver.saveContent(jsonObject);
         System.out.println(jsonObject);
         System.out.println();
+        destroyWebClient();
       } catch (Exception e) {
+        destroyWebClient();
         System.err.println("can't load page " + url);
         e.printStackTrace();
       }
     });
-    return content;
   }
 
   private JsonObject extractContentBySelectors(List<String> markup) {
@@ -182,15 +190,21 @@ public class ContentHandler {
     return page;
   }
 
-  @PostConstruct
-  public void initContentHandler() {
+  private void initWebClient(){
     client = new WebClient();
     client.getOptions().setThrowExceptionOnScriptError(false);
     client.getOptions().setJavaScriptEnabled(true);
     client.getOptions().setPopupBlockerEnabled(true);
     client.getOptions().setDownloadImages(false);
     client.getOptions().setTimeout(1000);
+  }
 
+  private void destroyWebClient(){
+    client.close();
+  }
+
+  @PostConstruct
+  public void initContentHandler() {
     try {
       selectors = JsonParser.parseReader(
           new FileReader(ContentHandler.class.getClassLoader().getResource(configFile).getFile()))

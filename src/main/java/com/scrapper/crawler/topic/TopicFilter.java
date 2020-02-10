@@ -27,7 +27,11 @@ public class TopicFilter {
     } else if (paginationPattern.equals("")) {
       return url.contains(topicsRootUrl);
     } else {
-      return pagination.matcher(url).matches();
+      if(url.equals(topicsRootUrl)){
+        return true;
+      }else {
+        return pagination.matcher(url).matches();
+      }
     }
   }
 
