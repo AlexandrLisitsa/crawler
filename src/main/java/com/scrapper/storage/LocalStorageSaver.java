@@ -13,13 +13,15 @@ public class LocalStorageSaver {
 
   @Value("${storagePath}")
   private String path;
+  private int count=0;
 
   public void saveContent(JsonObject content) {
     try {
-      FileWriter fileWriter = new FileWriter(path + File.separator + new Date() + ".json");
+      FileWriter fileWriter = new FileWriter(path + File.separator + count + ".json");
       fileWriter.write(content.toString());
       fileWriter.flush();
       fileWriter.close();
+      count++;
     } catch (
         IOException e) {
       e.printStackTrace();

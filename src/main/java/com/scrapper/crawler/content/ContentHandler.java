@@ -53,13 +53,16 @@ public class ContentHandler {
   public void extractContent() {
     topicsUrl.forEach(url -> {
       try {
+        initWebClient();
         System.out.println(url);
         List<String> httpMarkup = getHttpMarkups(url);
         JsonObject jsonObject = extractContentBySelectors(httpMarkup);
         storageSaver.saveContent(jsonObject);
         System.out.println(jsonObject);
         System.out.println();
+        destroyWebClient();
       } catch (Exception e) {
+        destroyWebClient();
         System.err.println("can't load page " + url);
         e.printStackTrace();
       }
@@ -187,15 +190,21 @@ public class ContentHandler {
     return page;
   }
 
-  @PostConstruct
-  public void initContentHandler() {
+  private void initWebClient(){
     client = new WebClient();
     client.getOptions().setThrowExceptionOnScriptError(false);
     client.getOptions().setJavaScriptEnabled(true);
     client.getOptions().setPopupBlockerEnabled(true);
     client.getOptions().setDownloadImages(false);
     client.getOptions().setTimeout(1000);
+  }
 
+  private void destroyWebClient(){
+    client.close();
+  }
+
+  @PostConstruct
+  public void initContentHandler() {
     try {
       selectors = JsonParser.parseReader(
           new FileReader(ContentHandler.class.getClassLoader().getResource(configFile).getFile()))
