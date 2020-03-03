@@ -1,23 +1,27 @@
 package com.scrapper.crawler.content;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 class TopicUrlContainer {
 
+  @Value("${retryAvailable}")
+  private int retryAvailable;
+  private List<TopicUrl> topics = new ArrayList<>();
 
-  private List<TopicUrl> topics;
-
-  TopicUrlContainer(Set<String> urls) {
-    topics = urls.stream().map(TopicUrl::new).collect(Collectors.toList());
+  void setTopics(Set<String> urls) {
+    topics = urls.stream().map(url -> new TopicUrl(url, retryAvailable))
+        .collect(Collectors.toList());
   }
 
   boolean hasNext() {
@@ -43,14 +47,11 @@ class TopicUrlContainer {
   }
 
   @Data
-  @RequiredArgsConstructor
+  @AllArgsConstructor
   class TopicUrl {
-
-    @NonNull
     private String url;
     @Getter(AccessLevel.PRIVATE)
-    @Setter(AccessLevel.NONE)
-    @Value("${retryAvailable}")
+    @Setter(AccessLevel.PRIVATE)
     private int retryAvailable;
   }
 
