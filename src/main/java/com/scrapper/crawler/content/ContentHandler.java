@@ -42,12 +42,13 @@ public class ContentHandler {
 
   private LocalStorageSaver storageSaver;
 
-  public ContentHandler(LocalStorageSaver storageSaver) {
+  public ContentHandler(LocalStorageSaver storageSaver, TopicUrlContainer urlContainer) {
     this.storageSaver = storageSaver;
+    this.urlContainer = urlContainer;
   }
 
   public void setTopicsUrl(Set<String> topicsUrl) {
-    urlContainer = new TopicUrlContainer(topicsUrl);
+    urlContainer.setTopics(topicsUrl);
   }
 
   public void extractContent() {
