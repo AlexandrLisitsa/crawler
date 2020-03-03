@@ -27,9 +27,9 @@ public class TopicFilter {
     } else if (paginationPattern.equals("")) {
       return url.contains(topicsRootUrl);
     } else {
-      if(url.equals(topicsRootUrl)){
+      if (url.equals(topicsRootUrl)) {
         return true;
-      }else {
+      } else {
         return pagination.matcher(url).matches();
       }
     }

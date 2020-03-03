@@ -13,7 +13,7 @@ public class LocalStorageSaver {
 
   @Value("${storagePath}")
   private String path;
-  private int count=0;
+  private int count = 0;
 
   public void saveContent(JsonObject content) {
     try {
