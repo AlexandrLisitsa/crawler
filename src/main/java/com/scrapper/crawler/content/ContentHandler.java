@@ -8,12 +8,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.scrapper.crawler.content.TopicUrlContainer.TopicUrl;
 import com.scrapper.storage.LocalStorageSaver;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class ContentHandler {
   private String jsContent;
   @Value("${contentPaginationSelector}")
   private String pagination;
-  private Set<String> topicsUrl = new HashSet<>();
+  private TopicUrlContainer urlContainer;
   private Set<Entry<String, JsonElement>> selectors;
   private WebClient client;
 
@@ -47,26 +47,27 @@ public class ContentHandler {
   }
 
   public void setTopicsUrl(Set<String> topicsUrl) {
-    this.topicsUrl = topicsUrl;
+    urlContainer = new TopicUrlContainer(topicsUrl);
   }
 
   public void extractContent() {
-    topicsUrl.forEach(url -> {
+    while (urlContainer.hasNext()) {
+      TopicUrl url = urlContainer.next();
       try {
         initWebClient();
         System.out.println(url);
-        List<String> httpMarkup = getHttpMarkups(url);
+        List<String> httpMarkup = getHttpMarkups(url.getUrl());
         JsonObject jsonObject = extractContentBySelectors(httpMarkup);
         storageSaver.saveContent(jsonObject);
         System.out.println(jsonObject);
         System.out.println();
+        urlContainer.removeTopic(url);
         destroyWebClient();
       } catch (Exception e) {
         destroyWebClient();
-        System.err.println("can't load page " + url);
-        e.printStackTrace();
+        System.err.println("can't load page " + url.getUrl());
       }
-    });
+    }
   }
 
   private JsonObject extractContentBySelectors(List<String> markup) {
@@ -107,7 +108,7 @@ public class ContentHandler {
 
   private JsonArray extractContent(JsonArray jsonElements, List<String> markups) {
     JsonObject selectors = jsonElements.get(0).getAsJsonObject();
-    Map<String,Elements> elements = new LinkedHashMap<>();
+    Map<String, Elements> elements = new LinkedHashMap<>();
     List<String> keys = selectors.entrySet().stream().map(Entry::getKey)
         .collect(Collectors.toList());
 
@@ -117,10 +118,10 @@ public class ContentHandler {
         Elements select = Jsoup.parse(markup).select(selector.getValue().getAsString());
         if (!select.isEmpty()) {
           Elements existElement = elements.get(selector.getKey());
-          if(existElement!=null){
+          if (existElement != null) {
             existElement.addAll(select);
-          }else{
-            elements.put(selector.getKey(),select);
+          } else {
+            elements.put(selector.getKey(), select);
           }
         }
       });
@@ -166,9 +167,9 @@ public class ContentHandler {
 
   private Page nextPage(Page page) throws IOException {
     HtmlElement element = ((HtmlPage) page).querySelector(pagination);
-    if(element==null){
+    if (element == null) {
       return null;
-    }else{
+    } else {
       return element.click();
     }
   }
@@ -190,7 +191,7 @@ public class ContentHandler {
     return page;
   }
 
-  private void initWebClient(){
+  private void initWebClient() {
     client = new WebClient();
     client.getOptions().setThrowExceptionOnScriptError(false);
     client.getOptions().setJavaScriptEnabled(true);
@@ -199,7 +200,7 @@ public class ContentHandler {
     client.getOptions().setTimeout(1000);
   }
 
-  private void destroyWebClient(){
+  private void destroyWebClient() {
     client.close();
   }
 

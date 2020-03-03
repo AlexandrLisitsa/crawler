@@ -17,19 +17,19 @@ public abstract class AbstractCrawler extends WebCrawler {
   @Value("${crawlersCount}")
   private int crawlersCount;
   @Value("${storagePath}")
-  private String storagePath="";
+  private String storagePath = "";
   @Value("${requestDelay}")
   private int requestDelay;
 
   private CrawlConfig config = new CrawlConfig();
   private PageFetcher pageFetcher = new PageFetcher(config);
   private RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
-  private RobotstxtServer robotstxtServer= new RobotstxtServer(robotstxtConfig, pageFetcher);
+  private RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
   private CrawlController controller;
 
-  public void start(WebCrawler crawler){
+  public void start(WebCrawler crawler) {
     config.setPolitenessDelay(requestDelay);
-    if(storagePath!=null) {
+    if (storagePath != null) {
       File crawlStorage = new File(storagePath);
       config.setCrawlStorageFolder(crawlStorage.getAbsolutePath());
     }
@@ -39,11 +39,11 @@ public abstract class AbstractCrawler extends WebCrawler {
       throw new RuntimeException(e);
     }
     controller.addSeed(topicsRootUrl);
-    CrawlController.WebCrawlerFactory<WebCrawler> factory = ()->crawler;
+    CrawlController.WebCrawlerFactory<WebCrawler> factory = () -> crawler;
     controller.start(factory, crawlersCount);
   }
 
-  protected void shutdown(){
+  protected void shutdown() {
     controller.shutdown();
   }
 
