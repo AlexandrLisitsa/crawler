@@ -15,12 +15,12 @@ import org.springframework.stereotype.Component;
 @Component
 class TopicUrlContainer {
 
-  @Value("${retryAvailable}")
-  private int retryAvailable;
+  @Value("${retryTopicAvailable}")
+  private int retryTopicAvailable;
   private List<TopicUrl> topics = new ArrayList<>();
 
   void setTopics(Set<String> urls) {
-    topics = urls.stream().map(url -> new TopicUrl(url, retryAvailable))
+    topics = urls.stream().map(url -> new TopicUrl(url, retryTopicAvailable))
         .collect(Collectors.toList());
   }
 

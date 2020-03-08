@@ -36,6 +36,8 @@ public class ContentHandler {
   private String jsContent;
   @Value("${contentPaginationSelector}")
   private String pagination;
+  @Value("${retryTopicPageAvailable}")
+  private int retryTopicPageAvailable;
   private TopicUrlContainer urlContainer;
   private Set<Entry<String, JsonElement>> selectors;
   private WebClient client;
@@ -95,7 +97,7 @@ public class ContentHandler {
       Element elem = Jsoup.parse(markup).selectFirst(selector.getValue().getAsString());
       if (element == null) {
         element = elem;
-      } else {
+      } else if (elem != null) {
         if (!element.text().contains(elem.text())) {
           element.text(element.text() + elem.text());
         }
@@ -157,7 +159,7 @@ public class ContentHandler {
       do {
         page = showJsContent(page);
         markups.add(((HtmlPage) page).asXml());
-      } while ((page = nextPage(page)) != null);
+      } while ((page = nextPage(page, retryTopicPageAvailable)) != null);
     } else {
       page = showJsContent(page);
       markups.add(((HtmlPage) page).asXml());
@@ -166,13 +168,34 @@ public class ContentHandler {
     return markups;
   }
 
-  private Page nextPage(Page page) throws IOException {
+  private Page nextPage(Page page, int tryAmount) {
+    Page nextPage = null;
     HtmlElement element = ((HtmlPage) page).querySelector(pagination);
+
     if (element == null) {
       return null;
     } else {
-      return element.click();
+      for (int i = 0; i < tryAmount; i++) {
+        try {
+          nextPage = element.click();
+          if (isPageContentEquals(page, nextPage)) {
+            return null;
+          } else {
+            return nextPage;
+          }
+        } catch (Exception e) {
+          System.out.println("Trying to reload " + page.getUrl() + " in " + i + " times");
+        }
+      }
     }
+    return null;
+  }
+
+  private boolean isPageContentEquals(Page first, Page second) {
+    boolean isUrlEquals = first.getUrl().equals(second.getUrl());
+    boolean isContentEquals = ((HtmlPage) first).asXml()
+        .equals(((HtmlPage) second).asXml());
+    return isUrlEquals && isContentEquals;
   }
 
   private Page showJsContent(Page page) throws IOException {
