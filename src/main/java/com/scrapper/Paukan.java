@@ -1,9 +1,7 @@
 package com.scrapper;
 
-import com.google.gson.JsonObject;
 import com.scrapper.crawler.content.ContentHandler;
 import com.scrapper.crawler.topic.TopicCrawler;
-import java.util.List;
 import javax.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
