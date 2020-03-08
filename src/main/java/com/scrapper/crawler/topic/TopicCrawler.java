@@ -24,6 +24,9 @@ public class TopicCrawler extends AbstractCrawler {
 
   @Override
   public boolean shouldVisit(Page referringPage, WebURL url) {
+    if(topicFilter.matchTopic(url.getURL())){
+      this.addNewTopicUrl(url.getURL());
+    }
     return topicFilter.matchRoot(url.getURL().toLowerCase());
   }
 
@@ -34,7 +37,7 @@ public class TopicCrawler extends AbstractCrawler {
       Set<WebURL> outgoingUrls = data.getOutgoingUrls();
       outgoingUrls.forEach(x -> {
         if (topicFilter.matchTopic(x.getURL())) {
-          addUrl(x.getURL());
+          addNewTopicUrl(x.getURL());
         }
       });
 
@@ -42,7 +45,7 @@ public class TopicCrawler extends AbstractCrawler {
     }
   }
 
-  private void addUrl(String url) {
+  private void addNewTopicUrl(String url) {
     if (maxTopicAmount == -1) {
       uniqueTopics.add(url);
     } else if (uniqueTopics.size() < maxTopicAmount) {
